@@ -110,5 +110,4 @@ function solution( A ){
 	return step;
 }
 
-// init
-console.log( "Intersects at Step: " + solution( args ));
+module.exports = solution;
