@@ -90,7 +90,7 @@ function solution( A ){
 			case 4:
 			case 5:
 				line1 = [ [x, y], points[ i - 1 ] ];
-				line2 = [ points[ i - 3 ], i - 4 < 0 ? [0, 0] : points[ i - 3 ] ];
+				line2 = [ points[ i - 3 ], i - 4 < 0 ? [0, 0] : points[ i - 4 ] ];
 				intersection = intersect( line1, line2 );
 			break;
 
