@@ -20,6 +20,14 @@ var testCases = [
 		output: 5
 	},
 	{
+		data: [10,10,5,15],
+		output: 4 
+	},
+	{
+		data: [5,5,10,10,7,4,3,2,9],
+		output: 8 
+	},
+	{
 		data: [1, 2, 2, 3, 3, 4, 4, 5, 5, 3, 2],
 		output: 11
 	}
