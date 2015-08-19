@@ -16,7 +16,7 @@ var testCases = [
 		output: 4
 	},
 	{
-		data: [2, 3, 3, 2, 4],
+		data: [5, 5, 10, 5, 7],
 		output: 5
 	},
 	{
