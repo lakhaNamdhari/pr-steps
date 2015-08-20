@@ -157,5 +157,3 @@ function solution( A ){
 }
 
 module.exports = solution;
-
-console.log( solution( [5,5,10,10,7,4,3,2,9]) );
