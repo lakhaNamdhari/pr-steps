@@ -6,43 +6,60 @@
 
 var args = process.argv.length > 2 ? JSON.parse(process.argv.slice(2)) : [];
 
+function processLine( line ){
+	var res = {};
+
+	if ( line[0].x === line[1].x ){
+		res.x = line[0].x;
+	}else if ( line[0].x < line[1].x ){
+		res.minX = line[0].x;
+		res.maxX = line[1].x;
+	}else{
+		res.minX = line[1].x;
+		res.maxX = line[0].x;
+	}
+
+	if ( line[0].y === line[1].y ){
+		res.y = line[0].y;
+	}else if ( line[0].y < line[1].y ){
+		res.minY = line[0].y;
+		res.maxY = line[1].y;
+	}else{
+		res.minY = line[1].y;
+		res.maxY = line[0].y;
+	}
+
+	return res;
+}
+
 // checks if perpendicular line segments intersect
 function intersect( line1, line2 ){
-	var intersection = false, value, min, max, xParallel, yParallel;
 
-	// If live startX and endX ae equal its parallel to y axis
-	if ( line1[0][0] === line1[1][0] ){
-		yParallel = line1;
-		xParallel = line2;
-	}else{
-		yParallel = line2;
-		xParallel = line1;
-	}
+	var l1 = processLine( line1 ), l2 = processLine( line2 ), intersection = false; //console.log(l1);console.log(l2);
 
-	// creating range for xAxis comparisons
-	if ( xParallel[0][0] > xParallel[1][0] ){
-		max = xParallel[0][0];
-		min = xParallel[1][0];
-	}else{
-		max = xParallel[1][0];
-		min = xParallel[0][0];
-	}
-	value = yParallel[0][0];
-
-	// check if, x cordinates of both lines fall in same range
-	if ( value >= min && value <= max ){
-		// creating range for yAxis comparisons
-		if ( yParallel[0][1] > yParallel[1][1] ){
-			max = yParallel[0][1];
-			min = yParallel[1][1];
-		}else{
-			max = yParallel[1][1];
-			min = yParallel[0][1];
+	// Case1 : Lines running perpendicular to each other
+	// 1.1 l1 is parallel to y-axis
+	if ( typeof l1.x !== 'undefined' && typeof l2.y !== 'undefined' ){//console.log("<<");console.log(l1);console.log(l2);
+		if ( (l2.y >= l1.minY && l2.y <= l1.maxY) && (l1.x >= l2.minX && l1.x <= l2.maxX) ){
+			intersection = true;
 		}
-		value = xParallel[0][1];
-
-		// check if, y cordinates of both lines fall in same range
-		if ( value >= min && value <= max ){
+	}
+	// 1.2 l1 is parallel to x-axis
+	else if ( typeof l1.y !== 'undefined' && typeof l2.x !== 'undefined' ){ 
+		if ( (l2.x >= l1.minX && l2.x <= l1.maxX) && (l1.y >= l2.minY && l1.y <= l2.maxY) ){
+			intersection = true; 
+		}
+	}
+	//Case 2: Line running parallel to each other
+	// 2.1 l1 and l2 parallel to y-axis
+	else if ( typeof l1.x !== 'undefined' && typeof l2.x !== 'undefined' ){
+		if ( (l1.x && l1.x) === l2.x && ((l2.maxY >= l1.minY && l2.maxY <= l1.maxY) || (l1.maxY >= l2.minY && l1.maxY <= l2.maxY))){
+			intersection = true;
+		}
+	}
+	// 2.2 l1 and l2 parallel to x-axis
+	else if ( typeof l1.y !== 'undefined' && typeof l2.y !== 'undefined' ){
+		if ( (l1.y === l2.y) && ((l2.maxX >= l1.minX && l2.maxX <= l1.maxX) || (l1.maxX >= l2.minX && l1.maxX <= l2.maxX))){
 			intersection = true;
 		}
 	}
@@ -57,57 +74,88 @@ function solution( A ){
 		// save cordinates at each step ( helpful to detect intersection )
 		switch( i % 4 ){
 			// Heading north
-			case 0:
-				points.push( [ x, y += A[ i ] ] );
+			case 0:	points.push({
+						x: x,
+						y: y += A[ i ]
+					});
 			break;
 
 			// Heading east
-			case 1:
-				points.push( [ x += A[ i ], y ] );
+			case 1:	points.push({
+						x: x += A[ i ],
+						y: y
+					});
 			break;
 
 			// Heading south
-			case 2:
-				points.push( [ x, y -= A[ i ]] );			
+			case 2:	points.push({
+						x: x, 
+						y: y -= A[ i ]
+					});
 			break;
-			
+
 			// Heading west
-			case 3:
-				points.push( [ x -= A[ i ], y ] );
+			case 3:	points.push({
+						x: x -= A[ i ],
+						y: y
+					});
 			break;
 		}
 
 		// find intersection at this point
-		switch( i ){
-			case 0:
-			case 1:
-			case 2:
-			// Do nothing, as it can't intersect at this point
-			break;
+		// Rule : 1
+		if ( i >= 3 ){
+			line1 = [
+				points[ i ],
+				points[ i - 1 ]
+			];
 
-			// for these cases, subtract by 3
-			case 3:
-			case 4:
-			case 5:
-				line1 = [ [x, y], points[ i - 1 ] ];
-				line2 = [ points[ i - 3 ], i - 4 < 0 ? [0, 0] : points[ i - 4 ] ];
-				intersection = intersect( line1, line2 );
-			break;
+			line2 = [
+				points[ i - 3 ],
+				i - 4 < 0 ? {x: 0, y: 0} : points[ i - 4 ]
+			];
+//console.log(i);console.log(line1);console.log(line2)
+			intersection = intersect( line1, line2 );
+		}
 
-			// all other cases, subtract by 5
-			default:
-				line1 = [ [x, y], points[ i - 1 ] ];
-				line2 = [ points[ i - 5 ], points[ i - 6 ] ];
-				intersection = intersect( line1, line2 );
-			break;
+		// Rule : 2
+		if ( !intersection && i >= 6 ){
+			line1 = [
+				points[ i ],
+				points[ i - 1 ]
+			];
+
+			line2 = [
+				points[ i - 5 ],
+				points[ i - 6 ]
+			];
+
+			intersection = intersect( line1, line2 );
+		}
+
+		// Rule : 3
+		if ( !intersection && i === 4 ){ 
+			line1 = [
+				points[ i ],
+				points[ i - 1 ]
+			];
+
+			line2 = [
+				points[ i - 4 ],
+				{x: 0, y: 0} 
+			];
+
+			intersection = intersect( line1, line2 );
 		}
 
 		if ( intersection ){
 			step = i + 1;
 			break;
 		}
-	}
+	} //console.log(points);
 	return step;
 }
 
 module.exports = solution;
+
+console.log( solution( [5,5,10,10,7,4,3,2,9]) );
